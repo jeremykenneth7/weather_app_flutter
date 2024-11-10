@@ -93,6 +93,36 @@ class _WeatherPageState extends State<WeatherPage> {
     _fetchWeather();
   }
 
+  void _showSearchDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Cari nama kota'),
+          content: TextField(
+            controller: _controller,
+            decoration: const InputDecoration(hintText: 'Masukkan nama kota'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _searchWeather(_controller.text);
+              },
+              child: const Text('Cari'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,48 +131,85 @@ class _WeatherPageState extends State<WeatherPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              TextField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  hintText: 'Cari nama kota ...',
-                  suffixIcon: IconButton(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.favorite_border_outlined),
+                    onPressed: () {},
+                  ),
+                  if (_weather != null)
+                    Text(
+                      _weather!.cityName,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
+                    )
+                  else
+                    const Text(
+                      'Loading...',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  IconButton(
                     icon: const Icon(Icons.search),
-                    onPressed: () {
-                      _searchWeather(_controller.text);
-                    },
+                    onPressed: _showSearchDialog,
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
+                ],
               ),
               const SizedBox(height: 20),
               if (_weather != null) ...[
-                Text(
-                  _weather!.cityName,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
                 Lottie.asset(getWeatherAnimation(_weather!.mainCondition)),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Text(
                   '${_weather!.temperature}°C',
-                  style: const TextStyle(fontSize: 24),
+                  style: const TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   _translateCondition(_weather!.mainCondition),
                   style: const TextStyle(fontSize: 18),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Kelembapan: ${_weather!.humidity}%',
-                  style: const TextStyle(fontSize: 18),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Kecepatan Angin: ${_weather!.windSpeed} m/s',
-                  style: const TextStyle(fontSize: 18),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.wb_incandescent_sharp),
+                          onPressed: () {},
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              '${_weather!.humidity}%',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            const Text('Kelembapan')
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 10),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.speed),
+                          onPressed: () {},
+                        ),
+                        const SizedBox(width: 5),
+                        Column(
+                          children: [
+                            Text(
+                              '${_weather!.windSpeed} m/s',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            const Text('Kecepatan Angin')
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ] else
                 const CircularProgressIndicator(),
