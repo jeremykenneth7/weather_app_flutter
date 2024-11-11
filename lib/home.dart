@@ -289,46 +289,129 @@ class SearchResultPage extends StatelessWidget {
     }
   }
 
+  Future<void> saveCityWeather(Weather weather) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('saved_city', weather.cityName);
+    await prefs.setDouble('saved_temperature', weather.temperature);
+    await prefs.setString('saved_condition', weather.mainCondition ?? '');
+    await prefs.setInt('saved_humidity', weather.humidity);
+    await prefs.setDouble('saved_windSpeed', weather.windSpeed);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Cuaca di ${weather.cityName} sekarang'),
-      ),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  weather.cityName,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  if (weather != null)
+                    Text(
+                      weather.cityName,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
+                    )
+                  else
+                    const Text(
+                      'Loading...',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      saveCityWeather(weather);
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Success'),
+                            content: Text(
+                                'Cuaca di ${weather.cityName} berhasil disimpan'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              if (weather != null) ...[
                 Lottie.asset(getWeatherAnimation(weather.mainCondition)),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Text(
                   '${weather.temperature}°C',
-                  style: TextStyle(fontSize: 24),
+                  style: const TextStyle(
+                      fontSize: 38, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   _translateCondition(weather.mainCondition),
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Kelembapan: ${weather.humidity}%',
-                  style: TextStyle(fontSize: 18),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.wb_incandescent_sharp),
+                          onPressed: () {},
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              '${weather.humidity}%',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            const Text('Kelembapan')
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 10),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.speed),
+                          onPressed: () {},
+                        ),
+                        const SizedBox(width: 5),
+                        Column(
+                          children: [
+                            Text(
+                              '${weather.windSpeed} m/s',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            const Text('Kecepatan Angin')
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Kecepatan Angin: ${weather.windSpeed} m/s',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
+              ] else
+                const CircularProgressIndicator(),
+            ],
           ),
         ),
       ),
