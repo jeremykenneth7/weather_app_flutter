@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather_app_flutter/model/model.dart';
 import 'package:weather_app_flutter/services/services.dart';
+import 'package:weather_app_flutter/login.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -40,6 +42,19 @@ class _WeatherPageState extends State<WeatherPage> {
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
+
+  _logout() async {
+    await clearSession();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
   }
 
   String getWeatherAnimation(String? mainCondition) {
@@ -135,8 +150,10 @@ class _WeatherPageState extends State<WeatherPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.favorite_border_outlined),
-                    onPressed: () {},
+                    icon: const Icon(Icons.logout),
+                    onPressed: () {
+                      _logout();
+                    },
                   ),
                   if (_weather != null)
                     Text(
@@ -162,7 +179,8 @@ class _WeatherPageState extends State<WeatherPage> {
                 const SizedBox(height: 10),
                 Text(
                   '${_weather!.temperature}°C',
-                  style: const TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 38, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Text(
