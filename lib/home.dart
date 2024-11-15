@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather_app_flutter/model/model.dart';
@@ -102,6 +103,28 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
+  String _selectedTimeZone = 'WIB';
+
+  String getCurrentTime(String timeZone) {
+    final now = DateTime.now();
+    DateTime convertedTime;
+
+    switch (timeZone) {
+      case 'WITA':
+        convertedTime = now.toUtc().add(Duration(hours: 8)); // WITA (GMT+8)
+        break;
+      case 'WIT':
+        convertedTime = now.toUtc().add(Duration(hours: 9)); // WIT (GMT+9)
+        break;
+      case 'WIB':
+      default:
+        convertedTime = now.toUtc().add(Duration(hours: 7)); // WIB (GMT+7)
+        break;
+    }
+
+    return DateFormat('HH:mm:ss').format(convertedTime);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -174,6 +197,27 @@ class _WeatherPageState extends State<WeatherPage> {
                 ],
               ),
               const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('${getCurrentTime(_selectedTimeZone)}', style: const TextStyle(fontSize: 24)),
+                  const SizedBox(width: 20),
+                  DropdownButton<String>(
+                    value: _selectedTimeZone,
+                    items: <String>['WIB', 'WITA', 'WIT'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedTimeZone = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
               if (_weather != null) ...[
                 Lottie.asset(getWeatherAnimation(_weather!.mainCondition)),
                 const SizedBox(height: 10),
