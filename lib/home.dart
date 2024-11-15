@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:weather_app_flutter/login.dart';
 import 'package:weather_app_flutter/model/model.dart';
 import 'package:weather_app_flutter/services/services.dart';
-import 'package:weather_app_flutter/login.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -111,14 +111,14 @@ class _WeatherPageState extends State<WeatherPage> {
 
     switch (timeZone) {
       case 'WITA':
-        convertedTime = now.toUtc().add(Duration(hours: 8)); // WITA (GMT+8)
+        convertedTime = now.toUtc().add(const Duration(hours: 8));
         break;
       case 'WIT':
-        convertedTime = now.toUtc().add(Duration(hours: 9)); // WIT (GMT+9)
+        convertedTime = now.toUtc().add(const Duration(hours: 9));
         break;
       case 'WIB':
       default:
-        convertedTime = now.toUtc().add(Duration(hours: 7)); // WIB (GMT+7)
+        convertedTime = now.toUtc().add(const Duration(hours: 7));
         break;
     }
 
@@ -164,8 +164,9 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
@@ -200,7 +201,8 @@ class _WeatherPageState extends State<WeatherPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('${getCurrentTime(_selectedTimeZone)}', style: const TextStyle(fontSize: 24)),
+                  Text(getCurrentTime(_selectedTimeZone),
+                      style: const TextStyle(fontSize: 24)),
                   const SizedBox(width: 20),
                   DropdownButton<String>(
                     value: _selectedTimeZone,
@@ -283,10 +285,17 @@ class _WeatherPageState extends State<WeatherPage> {
   }
 }
 
-class SearchResultPage extends StatelessWidget {
+class SearchResultPage extends StatefulWidget {
   final Weather weather;
 
-  const SearchResultPage({required this.weather, Key? key}) : super(key: key);
+  const SearchResultPage({required this.weather, super.key});
+
+  @override
+  _SearchResultPageState createState() => _SearchResultPageState();
+}
+
+class _SearchResultPageState extends State<SearchResultPage> {
+  String _selectedTimeZone = 'WIB';
 
   String getWeatherAnimation(String? mainCondition) {
     switch (mainCondition) {
@@ -342,11 +351,31 @@ class SearchResultPage extends StatelessWidget {
     await prefs.setDouble('saved_windSpeed', weather.windSpeed);
   }
 
+  String getCurrentTime(String timeZone) {
+    final now = DateTime.now();
+    DateTime convertedTime;
+
+    switch (timeZone) {
+      case 'WITA':
+        convertedTime = now.toUtc().add(const Duration(hours: 8));
+        break;
+      case 'WIT':
+        convertedTime = now.toUtc().add(const Duration(hours: 9));
+        break;
+      case 'WIB':
+      default:
+        convertedTime = now.toUtc().add(const Duration(hours: 7));
+        break;
+    }
+
+    return DateFormat('HH:mm:ss').format(convertedTime);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
@@ -359,29 +388,22 @@ class SearchResultPage extends StatelessWidget {
                       Navigator.pop(context);
                     },
                   ),
-                  if (weather != null)
-                    Text(
-                      weather.cityName,
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                    )
-                  else
-                    const Text(
-                      'Loading...',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
+                  Text(
+                    widget.weather.cityName,
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () {
-                      saveCityWeather(weather);
+                      saveCityWeather(widget.weather);
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text('Success'),
                             content: Text(
-                                'Cuaca di ${weather.cityName} berhasil disimpan'),
+                                'Cuaca di ${widget.weather.cityName} berhasil disimpan'),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -398,63 +420,83 @@ class SearchResultPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              if (weather != null) ...[
-                Lottie.asset(getWeatherAnimation(weather.mainCondition)),
-                const SizedBox(height: 10),
-                Text(
-                  '${weather.temperature}°C',
-                  style: const TextStyle(
-                      fontSize: 38, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  _translateCondition(weather.mainCondition),
-                  style: const TextStyle(fontSize: 18),
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.wb_incandescent_sharp),
-                          onPressed: () {},
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              '${weather.humidity}%',
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                            const Text('Kelembapan')
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 10),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.speed),
-                          onPressed: () {},
-                        ),
-                        const SizedBox(width: 5),
-                        Column(
-                          children: [
-                            Text(
-                              '${weather.windSpeed} m/s',
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                            const Text('Kecepatan Angin')
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ] else
-                const CircularProgressIndicator(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(getCurrentTime(_selectedTimeZone),
+                      style: const TextStyle(fontSize: 24)),
+                  const SizedBox(width: 20),
+                  DropdownButton<String>(
+                    value: _selectedTimeZone,
+                    items: <String>['WIB', 'WITA', 'WIT'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedTimeZone = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Lottie.asset(getWeatherAnimation(widget.weather.mainCondition)),
+              const SizedBox(height: 10),
+              Text(
+                '${widget.weather.temperature}°C',
+                style:
+                    const TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                _translateCondition(widget.weather.mainCondition),
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.wb_incandescent_sharp),
+                        onPressed: () {},
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            '${widget.weather.humidity}%',
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                          const Text('Kelembapan')
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 10),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.speed),
+                        onPressed: () {},
+                      ),
+                      const SizedBox(width: 5),
+                      Column(
+                        children: [
+                          Text(
+                            '${widget.weather.windSpeed} m/s',
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                          const Text('Kecepatan Angin')
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
         ),
