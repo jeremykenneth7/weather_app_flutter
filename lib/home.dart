@@ -106,19 +106,23 @@ class _WeatherPageState extends State<WeatherPage> {
   String _selectedTimeZone = 'WIB';
 
   String getCurrentTime(String timeZone) {
-    final now = DateTime.now();
+    final now =
+        DateTime.now().toUtc().add(const Duration(hours: 7)); // Default to WIB
     DateTime convertedTime;
 
     switch (timeZone) {
       case 'WITA':
-        convertedTime = now.toUtc().add(const Duration(hours: 8));
+        convertedTime = now.add(const Duration(hours: 1));
         break;
       case 'WIT':
-        convertedTime = now.toUtc().add(const Duration(hours: 9));
+        convertedTime = now.add(const Duration(hours: 2));
+        break;
+      case 'London':
+        convertedTime = now.subtract(const Duration(hours: 7));
         break;
       case 'WIB':
       default:
-        convertedTime = now.toUtc().add(const Duration(hours: 7));
+        convertedTime = now;
         break;
     }
 
@@ -206,7 +210,8 @@ class _WeatherPageState extends State<WeatherPage> {
                   const SizedBox(width: 20),
                   DropdownButton<String>(
                     value: _selectedTimeZone,
-                    items: <String>['WIB', 'WITA', 'WIT'].map((String value) {
+                    items: <String>['WIB', 'WITA', 'WIT', 'London']
+                        .map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value),
@@ -352,19 +357,23 @@ class _SearchResultPageState extends State<SearchResultPage> {
   }
 
   String getCurrentTime(String timeZone) {
-    final now = DateTime.now();
+    final now =
+        DateTime.now().toUtc().add(const Duration(hours: 7)); // Default to WIB
     DateTime convertedTime;
 
     switch (timeZone) {
       case 'WITA':
-        convertedTime = now.toUtc().add(const Duration(hours: 8));
+        convertedTime = now.add(const Duration(hours: 1));
         break;
       case 'WIT':
-        convertedTime = now.toUtc().add(const Duration(hours: 9));
+        convertedTime = now.add(const Duration(hours: 2));
+        break;
+      case 'London':
+        convertedTime = now.subtract(const Duration(hours: 7));
         break;
       case 'WIB':
       default:
-        convertedTime = now.toUtc().add(const Duration(hours: 7));
+        convertedTime = now;
         break;
     }
 
@@ -429,7 +438,8 @@ class _SearchResultPageState extends State<SearchResultPage> {
                   const SizedBox(width: 20),
                   DropdownButton<String>(
                     value: _selectedTimeZone,
-                    items: <String>['WIB', 'WITA', 'WIT'].map((String value) {
+                    items: <String>['WIB', 'WITA', 'WIT', 'London']
+                        .map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value),
