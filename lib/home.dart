@@ -346,7 +346,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('saved_city', weather.cityName);
     await prefs.setDouble('saved_temperature', weather.temperature);
-    await prefs.setString('saved_condition', weather.mainCondition ?? '');
+    await prefs.setString('saved_condition', weather.mainCondition);
     await prefs.setInt('saved_humidity', weather.humidity);
     await prefs.setDouble('saved_windSpeed', weather.windSpeed);
   }
