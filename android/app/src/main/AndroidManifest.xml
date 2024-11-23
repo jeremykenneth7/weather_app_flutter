@@ -1,10 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application
         android:label="weather_app_flutter"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.ActionReceiver" android:exported="true"/>
+        <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.DismissedReceiver" android:exported="true"/>
+        <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.ScheduledNotificationReceiver" android:exported="true"/>
+        <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.NotificationReceiver" android:exported="true"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

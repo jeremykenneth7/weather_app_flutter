@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:weather_app_flutter/home.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -16,6 +17,7 @@ class _LoginPageState extends State<LoginPage>
   final TextEditingController _passwordController = TextEditingController();
   late AnimationController _animationController;
   late Animation<double> _animation;
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   @override
   void initState() {
@@ -29,6 +31,13 @@ class _LoginPageState extends State<LoginPage>
       curve: Curves.easeInOut,
     );
     _animationController.forward();
+
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   @override
@@ -48,6 +57,27 @@ class _LoginPageState extends State<LoginPage>
     await prefs.setString(key, value);
   }
 
+  Future<void> _showNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'login_channel',
+      'Login Notifications',
+      channelDescription: 'Notification channel for login',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: false,
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Login Berhasil',
+      'Anda berhasil login',
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
+  }
+
   _login() async {
     String username = _usernameController.text;
     String password = encryptPassword(_passwordController.text);
@@ -55,6 +85,7 @@ class _LoginPageState extends State<LoginPage>
     // Simulasi validasi login
     if (username == 'cuacaku' && password == encryptPassword('password')) {
       await saveSession('username', username);
+      await _showNotification();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => WeatherPage()),
@@ -91,7 +122,8 @@ class _LoginPageState extends State<LoginPage>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('CuacaKu', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              Text('CuacaKu',
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               Lottie.asset('assets/thunder.json', height: 200),
               const SizedBox(height: 20),
               TextField(
