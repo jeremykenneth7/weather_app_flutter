@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:weather_app_flutter/home.dart';
+import 'package:weather_app_flutter/main.dart'; // Import MainPage
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class LoginPage extends StatefulWidget {
@@ -88,7 +89,8 @@ class _LoginPageState extends State<LoginPage>
       await _showNotification();
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => WeatherPage()),
+        MaterialPageRoute(
+            builder: (context) => MainPage()), // Navigate to MainPage
       );
     } else {
       // Tampilkan pesan error
